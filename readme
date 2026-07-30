@@ -1,73 +1,290 @@
-# Multi-Stage Docker Deployment for Next.js
+#  Next.js Multi-Stage Docker Deployment
 
-This project demonstrates how to containerize a Next.js frontend application using a standalone multi-stage Docker build. The build process separates dependency installation and application build from the final runtime image, resulting in a smaller and more efficient container.
+A production-ready example demonstrating how to containerize a **Next.js** application using a **multi-stage Docker build**. This approach creates a lightweight runtime image by separating the build process from the final production environment.
 
-## Overview
+---
 
-The project uses:
-- A Dockerfile that builds the frontend in an intermediate stage
-- A lightweight production image for running the app
-- Environment variable support for the application port
+##  Features
 
-## Prerequisites
+- ✅ Multi-stage Docker build
+- ✅ Optimized production image
+- ✅ Standalone Next.js deployment
+- ✅ Configurable application port
+- ✅ Minimal runtime dependencies
+- ✅ Easy to build and run
 
-Make sure you have the following installed:
-- Docker
-- Docker Engine running on your machine
+---
 
-## Build the Docker Image
+##  Project Structure
 
-From the project root directory, run:
-
-```bash
-docker build -t next_frontend_multistage -f docker/Dockerfile.frontend frontend
+```text
+.
+├── docker/
+│   └── Dockerfile.frontend
+├── frontend/
+│   ├── app/
+│   ├── public/
+│   ├── package.json
+│   └── ...
+└── README.md
 ```
 
-This command builds the image using the Dockerfile located in `docker/Dockerfile.frontend` and uses the `frontend` directory as the build context.
+---
 
-## Run the Container
+##  Prerequisites
 
-Start the container with:
+Before getting started, ensure you have:
+
+- Docker installed
+- Docker Engine running
+
+Verify your installation:
 
 ```bash
-docker run -d -e PORT=3030 -p 3030:3030 --name next_frontend_container next_frontend_multistage
+docker --version
+docker info
 ```
 
-### What this command does
-- `-d` runs the container in detached mode
-- `-e PORT=3030` sets the application port inside the container
-- `-p 3030:3030` publishes port 3030 on the host to port 3030 in the container
-- `--name next_frontend_container` assigns a friendly name to the container
+---
 
-## Access the Application
+#  Build the Docker Image
 
-Once the container is running, open the following URL in your browser:
+Run the following command from the project root:
+
+```bash
+docker build \
+  -t next_frontend_multistage \
+  -f docker/Dockerfile.frontend \
+  frontend
+```
+
+### Explanation
+
+| Option | Description |
+|---------|-------------|
+| `-t` | Tags the image as `next_frontend_multistage` |
+| `-f` | Specifies the Dockerfile location |
+| `frontend` | Build context |
+
+---
+
+#  Run the Container
+
+Start the application using:
+
+```bash
+docker run -d \
+  -e PORT=3030 \
+  -p 3030:3030 \
+  --name next_frontend_container \
+  next_frontend_multistage
+```
+
+### Command Breakdown
+
+| Flag | Purpose |
+|------|---------|
+| `-d` | Run container in detached mode |
+| `-e PORT=3030` | Sets the application port |
+| `-p 3030:3030` | Maps host port to container port |
+| `--name` | Assigns a container name |
+
+---
+
+#  Access the Application
+
+Once the container starts successfully, open:
 
 ```text
 http://localhost:3030
 ```
 
-## Useful Management Commands
+---
 
-Stop the container:
+#  Docker Management Commands
+
+## View Running Containers
+
+```bash
+docker ps
+```
+
+---
+
+## View All Containers
+
+```bash
+docker ps -a
+```
+
+---
+
+## Stop the Container
 
 ```bash
 docker stop next_frontend_container
 ```
 
-Remove the container:
+---
+
+## Start the Container Again
+
+```bash
+docker start next_frontend_container
+```
+
+---
+
+## Restart the Container
+
+```bash
+docker restart next_frontend_container
+```
+
+---
+
+## View Container Logs
+
+```bash
+docker logs next_frontend_container
+```
+
+Follow live logs:
+
+```bash
+docker logs -f next_frontend_container
+```
+
+---
+
+## Remove the Container
 
 ```bash
 docker rm next_frontend_container
 ```
 
-Remove the image:
+Force remove:
+
+```bash
+docker rm -f next_frontend_container
+```
+
+---
+
+## Remove the Docker Image
 
 ```bash
 docker rmi next_frontend_multistage
 ```
 
-## Notes
+---
 
-- The application is expected to listen on the port provided through the `PORT` environment variable.
-- Multi-stage builds help keep the final image clean and reduce its size by excluding build dependencies from the runtime stage.
+# Docker Workflow
+
+```text
+Next.js Source Code
+        │
+        ▼
+docker build
+        │
+        ▼
+Multi-Stage Build
+        │
+        ├── Builder Stage
+        │      • Install dependencies
+        │      • Build Next.js app
+        │
+        ▼
+Runtime Stage
+        │
+        • Copy standalone build
+        • Copy static assets
+        • Start production server
+        │
+        ▼
+docker run
+        │
+        ▼
+Application Available
+http://localhost:3030
+```
+
+---
+
+# Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | Port on which the application runs | `3000` |
+
+Example:
+
+```bash
+docker run -d \
+-e PORT=4000 \
+-p 4000:4000 \
+next_frontend_multistage
+```
+
+---
+
+#  Why Multi-Stage Builds?
+
+Using a multi-stage Docker build provides several advantages:
+
+- Smaller final image size
+- Faster deployments
+- Reduced attack surface
+- Cleaner production image
+- Build dependencies are excluded from the runtime image
+- Better cache utilization during builds
+
+---
+
+#  Cleanup
+
+Remove unused Docker resources:
+
+```bash
+docker system prune
+```
+
+Remove everything including unused images and volumes:
+
+```bash
+docker system prune -a --volumes
+```
+
+---
+
+# Notes
+
+- The application listens on the port specified by the `PORT` environment variable.
+- Ensure the host and container ports match when publishing ports.
+- The production image contains only the files required to run the Next.js application.
+- This setup is ideal for production deployments and CI/CD pipelines.
+
+---
+
+## Example
+
+```bash
+# Build
+docker build -t next_frontend_multistage -f docker/Dockerfile.frontend frontend
+
+# Run
+docker run -d \
+-e PORT=3030 \
+-p 3030:3030 \
+--name next_frontend_container \
+next_frontend_multistage
+
+# Open
+http://localhost:3030
+```
+
+---
+
+## License
+
+This project is intended for learning and demonstration purposes.
