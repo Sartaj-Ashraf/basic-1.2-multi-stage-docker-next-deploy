@@ -1,0 +1,73 @@
+# Multi-Stage Docker Deployment for Next.js
+
+This project demonstrates how to containerize a Next.js frontend application using a standalone multi-stage Docker build. The build process separates dependency installation and application build from the final runtime image, resulting in a smaller and more efficient container.
+
+## Overview
+
+The project uses:
+- A Dockerfile that builds the frontend in an intermediate stage
+- A lightweight production image for running the app
+- Environment variable support for the application port
+
+## Prerequisites
+
+Make sure you have the following installed:
+- Docker
+- Docker Engine running on your machine
+
+## Build the Docker Image
+
+From the project root directory, run:
+
+```bash
+docker build -t next_frontend_multistage -f docker/Dockerfile.frontend frontend
+```
+
+This command builds the image using the Dockerfile located in `docker/Dockerfile.frontend` and uses the `frontend` directory as the build context.
+
+## Run the Container
+
+Start the container with:
+
+```bash
+docker run -d -e PORT=3030 -p 3030:3030 --name next_frontend_container next_frontend_multistage
+```
+
+### What this command does
+- `-d` runs the container in detached mode
+- `-e PORT=3030` sets the application port inside the container
+- `-p 3030:3030` publishes port 3030 on the host to port 3030 in the container
+- `--name next_frontend_container` assigns a friendly name to the container
+
+## Access the Application
+
+Once the container is running, open the following URL in your browser:
+
+```text
+http://localhost:3030
+```
+
+## Useful Management Commands
+
+Stop the container:
+
+```bash
+docker stop next_frontend_container
+```
+
+Remove the container:
+
+```bash
+docker rm next_frontend_container
+```
+
+Remove the image:
+
+```bash
+docker rmi next_frontend_multistage
+```
+
+## Notes
+
+- The application is expected to listen on the port provided through the `PORT` environment variable.
+- Multi-stage builds help keep the final image clean and reduce its size by excluding build dependencies from the runtime stage.
